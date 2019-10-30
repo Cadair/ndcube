@@ -179,10 +179,6 @@ class NDCubeBase(NDCubeSlicingMixin, NDCubeABC):
     def __init__(self, data, wcs, uncertainty=None, mask=None, meta=None,
                  unit=None, extra_coords=None, copy=False, **kwargs):
 
-        # Enforce that the WCS object is a low_level_wcs object, complying APE14
-        if not isinstance(wcs, BaseLowLevelWCS):
-            raise TypeError(f'Expected a {type(BaseLowLevelWCS)} object, got {type(wcs)}')
-
         # Format extra coords.
         if extra_coords:
             self._extra_coords_wcs_axis = \
@@ -196,14 +192,22 @@ class NDCubeBase(NDCubeSlicingMixin, NDCubeABC):
                          meta=meta, unit=unit, copy=copy, **kwargs)
 
     @property
-    def high_level_wcs(self):
+    def low_level_wcs(self):
         """
         Returns the high level wcs API from the given low_level wcs API
         """
-        if isinstance(self.wcs, BaseHighLevelWCS):
-            return self.wcs
-        else:
-            return HighLevelWCSWrapper(self.wcs)
+        return self.wcs.low_level_wcs
+
+    @property
+    def wcs(self):
+        """
+        A world coordinate system (WCS) for the dataset.
+        """
+        return super().wcs
+
+    # @setter.wcs
+    # def wcs(self, val):
+    #     raise AttributeError("You can not set the .wcs property of an NDCube instance.")
 
     @property
     def dimensions(self):
@@ -240,7 +244,7 @@ class NDCubeBase(NDCubeSlicingMixin, NDCubeABC):
         # The docstring is defined in NDDataBase
 
         quantity_axis_list = quantity_axis_list[::-1]
-        pixel_to_world = self.high_level_wcs.pixel_to_world(*quantity_axis_list)
+        pixel_to_world = self.wcs.pixel_to_world(*quantity_axis_list)
         if isinstance(pixel_to_world, (tuple, list)):
             return pixel_to_world[::-1]
 
@@ -250,7 +254,7 @@ class NDCubeBase(NDCubeSlicingMixin, NDCubeABC):
         # The docstring is defined in NDDataBase
 
         quantity_axis_list = quantity_axis_list[::-1]
-        world_to_pixel = self.high_level_wcs.world_to_pixel(*quantity_axis_list)
+        world_to_pixel = self.wcs.world_to_pixel(*quantity_axis_list)
 
         # Adding the units of the output
         result = [u.Quantity(world_to_pixel[index], unit=u.pix) for index in range(self.wcs.pixel_n_dim)]

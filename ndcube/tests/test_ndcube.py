@@ -158,24 +158,15 @@ cube_rotated = NDCube(
         cubem,
         cubet])
 def test_wcs_object(nd_cube):
-    assert isinstance(nd_cube.wcs, BaseLowLevelWCS)
-    assert isinstance(nd_cube.high_level_wcs, BaseHighLevelWCS)
+    assert isinstance(nd_cube.wcs, BaseHighLevelWCS)
+    assert isinstance(nd_cube.low_level_wcs, BaseLowLevelWCS)
+    with pytest.raises(AttributeError):
+        nd_cube.wcs = "hello"
 
 
 @pytest.mark.parametrize(
     "test_input,expected,mask,wcs,uncertainty,dimensions,world_axis_physical_types,extra_coords",
     [
-        (cubem[:, 1],
-         NDCube,
-         mask_cubem[:, 1],
-         SlicedLowLevelWCS(cubem.wcs, (slice(None), 1, slice(None))),
-         data[:, 1],
-         u.Quantity((2, 4), unit=u.pix),
-         ('custom:pos.helioprojective.lon', 'em.wl'),
-            {'bye': {'axis': 1, 'value': u.Quantity(range(int(cubem.dimensions[2].value)), unit=u.pix)},
-             'hello': {'axis': None, 'value': u.Quantity(1, unit=u.pix)},
-             'time': {'axis': 0, 'value': u.Quantity(range(int(cubem.dimensions[0].value)), unit=u.pix)}}
-         ),
         (cubem[:, 0:2],
             NDCube,
             mask_cubem[:, 0:2],
@@ -187,16 +178,16 @@ def test_wcs_object(nd_cube):
              'hello': {'axis': 1, 'value': u.Quantity(range(2), unit=u.pix)},
              'time': {'axis': 0, 'value': u.Quantity(range(int(cubem.dimensions[0].value)), unit=u.pix)}}
          ),
-        (cubem[:, :],
-            NDCube,
-            mask_cubem[:, :],
-            SlicedLowLevelWCS(cubem.wcs, (slice(None), slice(None), slice(None))),
-            data[:, :],
-            u.Quantity((2, 3, 4), unit=u.pix),
-            ('custom:pos.helioprojective.lon', 'custom:pos.helioprojective.lat', 'em.wl'),
-            {'time': {'axis': 0, 'value': u.Quantity(range(int(cubem.dimensions[0].value)), unit=u.pix)},
-             'hello': {'axis': 1, 'value': u.Quantity(range(int(cubem.dimensions[1].value)), unit=u.pix)},
-             'bye': {'axis': 2, 'value': u.Quantity(range(int(cubem.dimensions[2].value)), unit=u.pix)}}
+        (cubem[:, 1],
+         NDCube,
+         mask_cubem[:, 1],
+         SlicedLowLevelWCS(cubem.wcs, (slice(None), 1, slice(None))),
+         data[:, 1],
+         u.Quantity((2, 4), unit=u.pix),
+         ('custom:pos.helioprojective.lon', 'em.wl'),
+            {'bye': {'axis': 1, 'value': u.Quantity(range(int(cubem.dimensions[2].value)), unit=u.pix)},
+             'hello': {'axis': None, 'value': u.Quantity(1, unit=u.pix)},
+             'time': {'axis': 0, 'value': u.Quantity(range(int(cubem.dimensions[0].value)), unit=u.pix)}}
          ),
         (cubem[1, 1],
             NDCube,
