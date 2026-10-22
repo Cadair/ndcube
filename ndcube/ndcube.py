@@ -32,6 +32,7 @@ from ndcube.global_coords import GlobalCoords, GlobalCoordsABC
 from ndcube.meta import NDMetaABC
 from ndcube.mixins import NDCubeSlicingMixin
 from ndcube.ndcube_sequence import NDCubeSequence
+from ndcube.utils.descriptor import NDCubeLinkedDescriptor
 from ndcube.utils.exceptions import warn_deprecated, warn_user
 from ndcube.visualization import PlotterDescriptor
 from ndcube.wcs.wrappers import CompoundLowLevelWCS, ResampledLowLevelWCS
@@ -286,50 +287,6 @@ class NDCubeABC(astropy.nddata.NDDataBase):
         >>> # An example of cropping a region of interest on the Sun from a 3-D image-time cube
         >>> NDCube.crop_by_values((-600, -600, 0), (0, 0, 0), units=(u.arcsec, u.arcsec, u.s)) # doctest: +SKIP
         """
-
-
-class NDCubeLinkedDescriptor:
-    """
-    A descriptor which gives the property a reference to the cube to which it is attached.
-    """
-
-    def __init__(self, default_type):
-        self._default_type = default_type
-        self._property_name = None
-
-    def __set_name__(self, owner, name):
-        """
-        This function is called when the class the descriptor is attached to is initialized.
-
-        The *class* and not the instance.
-        """
-        # property name is the name of the attribute on the parent class
-        # pointing at an instance of this descriptor.
-        self._property_name = name
-        # attribute name is the name of the attribute on the parent class where
-        # the data is stored.
-        self._attribute_name = f"_{name}"
-
-    def __get__(self, obj, objtype=None):
-        if obj is None:
-            return None
-
-        if getattr(obj, self._attribute_name, None) is None and self._default_type is not None:
-            self.__set__(obj, self._default_type)
-
-        return getattr(obj, self._attribute_name)
-
-    def __set__(self, obj, value):
-        if isinstance(value, self._default_type):
-            value._ndcube = obj
-        elif issubclass(value, self._default_type):
-            value = value(obj)
-        else:
-            raise ValueError(
-                f"Unable to set value for {self._property_name} it should "
-                f"be an instance or subclass of {self._default_type}")
-
-        setattr(obj, self._attribute_name, value)
 
 
 class NDCubeBase(NDCubeABC, astropy.nddata.NDData, NDCubeSlicingMixin):

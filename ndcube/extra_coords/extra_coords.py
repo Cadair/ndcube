@@ -14,6 +14,7 @@ from astropy.wcs.wcsapi import BaseHighLevelWCS
 from astropy.wcs.wcsapi.high_level_wcs_wrapper import HighLevelWCSWrapper
 from astropy.wcs.wcsapi.wrappers.sliced_wcs import SlicedLowLevelWCS
 
+from ndcube.utils.descriptor import ParentCubeAccessor
 from ndcube.utils.misc import _simplify_basic_index
 from ndcube.utils.wcs import convert_between_array_and_pixel_axes
 from ndcube.wcs.wrappers import CompoundLowLevelWCS, ResampledLowLevelWCS
@@ -122,7 +123,7 @@ class ExtraCoordsABC(abc.ABC):
         """
 
 
-class ExtraCoords(ExtraCoordsABC):
+class ExtraCoords(ExtraCoordsABC, ParentCubeAccessor):
     """
     A representation of additional world coordinates associated with pixel axes.
 

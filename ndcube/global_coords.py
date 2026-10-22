@@ -10,6 +10,7 @@ from astropy.coordinates.sky_coordinate import SkyCoord
 from astropy.wcs.wcsapi.high_level_api import default_order
 from astropy.wcs.wcsapi.utils import deserialize_class
 
+from ndcube.utils.descriptor import ParentCubeAccessor
 from ndcube.utils.wcs import validate_physical_types
 
 
@@ -80,7 +81,7 @@ class GlobalCoordsABC(Mapping):
         """
 
 
-class GlobalCoords(GlobalCoordsABC):
+class GlobalCoords(GlobalCoordsABC, ParentCubeAccessor):
     # Docstring in GlobalCoordsABC
 
     def __init__(self, ndcube=None):
@@ -215,12 +216,13 @@ class GlobalCoords(GlobalCoordsABC):
 
     def __getitem__(self, item):
         # Docstring in GlobalCoordsABC
-        if item not in self._all_coords:
-            for key, value in self._all_coords.items():
+        all_coords = self._all_coords
+        if item not in all_coords:
+            for key, value in all_coords.items():
                 if isinstance(key, tuple) and item in key:
                     return value[1]
 
-        return self._all_coords[item][1]
+        return all_coords[item][1]
 
     def __iter__(self):
         # Docstring in GlobalCoordsABC

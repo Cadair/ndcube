@@ -149,7 +149,7 @@ class SerializedWCS(BaseLowLevelWCS, HighLevelWCSMixin):
 
     @property
     def axis_correlation_matrix(self):
-        return np.identity(2)
+        return np.identity(2, dtype=int)
 
     @property
     def world_axis_physical_types(self):
